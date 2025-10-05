@@ -1,0 +1,8 @@
+{
+  "app": "kycflow-api",
+  "port": 8080,
+  "build": {
+    "location": "iran"
+  },
+  "disks": []
+}
