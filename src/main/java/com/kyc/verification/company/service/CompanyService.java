@@ -4,7 +4,7 @@ import com.kyc.verification.company.model.dto.CompanyRegistrationDto;
 import com.kyc.verification.company.model.dto.UserProfileDto;
 import com.kyc.verification.company.model.entity.Company;
 import com.kyc.verification.company.repository.CompanyRepository;
-import com.kyc.verification.util.OtpService;
+import com.kyc.verification.common.OtpService;
 import com.kyc.verification.util.ApiKeyGenerator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

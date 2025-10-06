@@ -1,6 +1,6 @@
 package com.kyc.verification.config;
 
-import com.kyc.verification.util.JwtTokenService;
+import com.kyc.verification.common.JwtTokenService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

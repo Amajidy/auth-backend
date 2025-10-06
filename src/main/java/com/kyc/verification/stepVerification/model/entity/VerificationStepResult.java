@@ -2,6 +2,7 @@ package com.kyc.verification.stepVerification.model.entity;
 
 import com.kyc.verification.stepVerification.model.enums.VerificationStepEnum;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -38,6 +39,14 @@ public class VerificationStepResult {
 
     @Column(name = "verified_at")
     private LocalDateTime verifiedAt;
+
+    @Lob
+    @Column(name = "video_data", columnDefinition = "LONGTEXT")
+    private String videoData;
+
+    @Lob
+    @Column(name = "sign_data", columnDefinition = "LONGTEXT")
+    private String signData;
 
     @PrePersist
     protected void onCreate() {

@@ -7,7 +7,7 @@ import com.kyc.verification.company.model.dto.RequestOtpResponse;
 import com.kyc.verification.company.model.dto.RequestOtpDto;
 import com.kyc.verification.company.model.entity.Company;
 import com.kyc.verification.company.service.CompanyService;
-import com.kyc.verification.util.JwtTokenService;
+import com.kyc.verification.common.JwtTokenService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

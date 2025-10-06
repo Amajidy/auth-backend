@@ -1,6 +1,7 @@
 package com.kyc.verification.company.model.dto;
 
 import com.kyc.verification.stepVerification.model.entity.VerificationSession;
+import com.kyc.verification.stepVerification.model.enums.VerificationStepEnum;
 import lombok.Builder;
 import lombok.Data;
 
@@ -10,23 +11,26 @@ import java.time.LocalDateTime;
 @Builder
 public class UserReportDto {
     private String trackingCode;
-    private String status; // وضعیت نهایی: SUCCESS, FAILED, PENDING
+    private Boolean isCompleted;
     private String failedReason;
-    private String currentStep;
+    private VerificationStepEnum currentStep;
     private LocalDateTime createdAt;
     private LocalDateTime completedAt;
+    private String firstName;
+    private String lastName;
+    private String nationalCode;
+    private String mobileNumber;
 
     public static UserReportDto fromSession(VerificationSession session) {
-        String finalStatus = "PENDING";
-        if (session.getIsCompleted() != null) {
-            finalStatus = session.getIsCompleted() ? "SUCCESS" : "FAILED";
-        }
-
         return UserReportDto.builder()
                 .trackingCode(session.getTrackingCode())
-                .status(finalStatus)
+                .isCompleted(session.getIsCompleted())
                 .failedReason(session.getFailedReason())
-                .currentStep("Step " + session.getCurrentStep())
+                .firstName(session.getFirstName())
+                .lastName(session.getLastName())
+                .nationalCode(session.getNationalCode())
+                .mobileNumber(session.getMobileNumber())
+                .currentStep(session.getCurrentStep())
                 .createdAt(session.getCreatedAt())
                 .completedAt(session.getUpdatedAt())
                 .build();

@@ -13,8 +13,6 @@ public interface VerificationSessionRepository extends JpaRepository<Verificatio
 
     Optional<VerificationSession> findByTrackingCode(String trackingCode);
 
-    List<VerificationSession> findAllByCompanyId(Long companyId);
-
     List<VerificationSession> findAllByCompany(Company company);
 
 }

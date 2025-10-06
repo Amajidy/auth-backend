@@ -2,10 +2,7 @@ package com.kyc.verification.stepVerification.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.kyc.verification.stepVerification.model.dto.ShahkarConvertJson;
-import com.kyc.verification.stepVerification.model.dto.ShahkarStepRequest;
-import com.kyc.verification.stepVerification.model.dto.UpdateStepResponse;
-import com.kyc.verification.stepVerification.model.dto.VerificationCallbackResult;
+import com.kyc.verification.stepVerification.model.dto.steps.*;
 import com.kyc.verification.stepVerification.model.entity.VerificationSession;
 import com.kyc.verification.stepVerification.model.entity.VerificationStepResult;
 import com.kyc.verification.stepVerification.model.enums.VerificationStepEnum;
@@ -56,59 +53,58 @@ public class VerificationFlowService {
     }
 
     @Transactional
-    public VerificationSession updateStepStatus(
-            String trackingCode, VerificationStepEnum stepName,
-            boolean isPassed, String storagePath,
-            String details
-    ) {
-
-        VerificationSession session = sessionRepository.findByTrackingCode(trackingCode)
+    public UpdateStepResponse videoStep(@Valid VideoStepRequest request) {
+        VerificationSession session = sessionRepository.findByTrackingCode(request.getTrackingCode())
                 .orElseThrow(() -> new RuntimeException("Session not found or expired"));
 
-        if (!session.getCurrentStep().equals(stepName)) {
-            throw new IllegalStateException("User is not at step " + stepName);
+        Boolean isPassed = true;
+
+        VerificationStepResult stepResult = new VerificationStepResult();
+        stepResult.setSession(session);
+        stepResult.setStepName(VerificationStepEnum.VIDEO);
+        stepResult.setIsPassed(isPassed);
+
+        if (request.getVideoData() != null && !request.getVideoData().isEmpty()) {
+            stepResult.setVideoData(request.getVideoData());
         }
 
-        VerificationStepResult result = new VerificationStepResult();
-        result.setSession(session);
-        result.setStepName(stepName);
-        result.setIsPassed(isPassed);
-        result.setDataStoragePath(storagePath);
-        result.setDetails(details);
-        resultRepository.save(result);
+        resultRepository.save(stepResult);
 
         if (isPassed) {
-            if (stepName.getStepNumber() < 3) {
-                session.setCurrentStep(VerificationStepEnum.fromStepNumber(stepName.getStepNumber() + 1));
-            } else {
-                session.setIsCompleted(true);
-            }
-        } else {
-            session.setIsCompleted(false);
-            session.setFailedReason("Failed at step " + stepName);
+            session.setCurrentStep(VerificationStepEnum.SIGN);
+            sessionRepository.save(session);
         }
 
-        return sessionRepository.save(session);
+        return UpdateStepResponse.builder()
+                .isPassed(isPassed)
+                .build();
     }
 
-    public VerificationCallbackResult finalizeCallback(VerificationSession session) {
-        String status = session.getIsCompleted() ? "SUCCESS" : "FAILED";
-        String reason = session.getFailedReason() != null ? session.getFailedReason() : "";
+    @Transactional
+    public UpdateStepResponse signStep(@Valid SignStepRequest request) {
+        VerificationSession session = sessionRepository.findByTrackingCode(request.getTrackingCode())
+                .orElseThrow(() -> new RuntimeException("Session not found or expired"));
 
-        String queryParams = String.format(
-                "?trackingCode=%s&status=%s&reason=%s",
-                session.getTrackingCode(),
-                status,
-                reason
-        );
+        Boolean isPassed = true;
 
-        String finalRedirectUrl = session.getCompany().getCallbackUrl() + queryParams;
+        VerificationStepResult stepResult = new VerificationStepResult();
+        stepResult.setSession(session);
+        stepResult.setStepName(VerificationStepEnum.SIGN);
+        stepResult.setIsPassed(isPassed);
 
-        return VerificationCallbackResult.builder()
-                .redirectUrl(finalRedirectUrl)
-                .trackingCode(session.getTrackingCode())
-                .status(status)
-                .callbackUrl(session.getCompany().getCallbackUrl())
+        if (request.getSignData() != null && !request.getSignData().isEmpty()) {
+            stepResult.setSignData(request.getSignData());
+        }
+
+        resultRepository.save(stepResult);
+
+        if (isPassed) {
+            session.setIsCompleted(true);
+            sessionRepository.save(session);
+        }
+
+        return UpdateStepResponse.builder()
+                .isPassed(isPassed)
                 .build();
     }
 }

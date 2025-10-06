@@ -4,8 +4,11 @@ import com.kyc.verification.company.model.dto.UserReportDto;
 import com.kyc.verification.company.model.entity.Company;
 import com.kyc.verification.company.service.CompanyService;
 import com.kyc.verification.stepVerification.model.dto.StartVerificationResponse;
+import com.kyc.verification.stepVerification.model.dto.StepVerificationDetailsResponse;
 import com.kyc.verification.stepVerification.model.entity.VerificationSession;
+import com.kyc.verification.stepVerification.model.entity.VerificationStepResult;
 import com.kyc.verification.stepVerification.repository.VerificationSessionRepository;
+import com.kyc.verification.stepVerification.repository.VerificationStepResultRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -19,6 +22,7 @@ public class VerificationService {
 
     private final CompanyService companyService;
     private final VerificationSessionRepository sessionRepository;
+    private final VerificationStepResultRepository stepResultRepository;
 
     public Optional<StartVerificationResponse> findSessionIfExist(String apiKey, String trackingCode) {
         Company company = companyService.findCompanyByApiKey(apiKey)
@@ -53,6 +57,21 @@ public class VerificationService {
         return sessions.stream()
                 .map(UserReportDto::fromSession)
                 .collect(Collectors.toList());
+    }
+
+    public Optional<List<StepVerificationDetailsResponse>> getDetailsByTrackingCode(String trackingCode) {
+        Optional<VerificationSession> session = this.findSessionByTrackingCode(trackingCode);
+
+        if (session.isPresent()) {
+            VerificationSession sessionFind = session.get();
+            List<VerificationStepResult> stepResult = this.stepResultRepository.findBySessionId(sessionFind.getId());
+
+            return Optional.of(stepResult.stream()
+                    .map(StepVerificationDetailsResponse::fromStepResult)
+                    .collect(Collectors.toList()));
+        }
+
+        return Optional.empty();
     }
 
     private Optional<VerificationSession> findSessionByTrackingCode(String trackingCode) {
