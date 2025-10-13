@@ -1,5 +1,6 @@
 package com.kyc.verification.company.controller;
 
+import com.kyc.verification.common.ApiResponse;
 import com.kyc.verification.company.model.dto.UserProfileDto;
 import com.kyc.verification.company.model.dto.UserReportDto;
 import com.kyc.verification.company.service.CompanyService;
@@ -27,25 +28,25 @@ public class CompanyAdminController {
 
     @GetMapping("reports")
     @PreAuthorize("hasRole('COMPANY_ADMIN')")
-    public ResponseEntity<List<UserReportDto>> getCompanyReports() {
+    public ResponseEntity<ApiResponse<List<UserReportDto>>> getCompanyReports() {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String adminMobileNumber = authentication.getName();
 
         List<UserReportDto> reports = verificationService.getReportsByCompanyAdminPrincipal(adminMobileNumber);
 
-        return ResponseEntity.ok(reports);
+        return ResponseEntity.ok(ApiResponse.success(reports));
     }
 
     @GetMapping("profile")
     @PreAuthorize("hasRole('COMPANY_ADMIN')")
-    public ResponseEntity<UserProfileDto> getCompanyProfile() {
+    public ResponseEntity<ApiResponse<UserProfileDto>> getCompanyProfile() {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String adminMobileNumber = authentication.getName();
 
         UserProfileDto profile = companyService.getCompanyProfile(adminMobileNumber);
 
-        return ResponseEntity.ok(profile);
+        return ResponseEntity.ok(ApiResponse.success(profile));
     }
 }

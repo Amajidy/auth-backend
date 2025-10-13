@@ -1,5 +1,7 @@
 package com.kyc.verification.company.controller;
 
+import com.kyc.verification.common.ApiResponse;
+import com.kyc.verification.company.exception.MobileNotFoundException;
 import com.kyc.verification.company.model.dto.CompanyRegistrationDto;
 import com.kyc.verification.company.model.dto.CompanyResponseDto;
 import com.kyc.verification.company.model.dto.LoginRequestDto;
@@ -30,14 +32,16 @@ public class CompanyAuthController {
     private final JwtTokenService jwtTokenService;
 
     @PostMapping("/register")
-    public ResponseEntity<CompanyResponseDto> registerCompany(@Valid @RequestBody CompanyRegistrationDto registrationDto) {
+    public ResponseEntity<ApiResponse<CompanyResponseDto>> registerCompany(@Valid @RequestBody CompanyRegistrationDto registrationDto) {
         Company newCompany = companyService.registerCompany(registrationDto);
         CompanyResponseDto response = CompanyResponseDto.fromEntity(newCompany);
-        return new ResponseEntity<>(response, HttpStatus.CREATED);
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(ApiResponse.success(response));
     }
 
     @PostMapping("/otp/request")
-    public ResponseEntity<RequestOtpResponse> requestOtp(@Valid @RequestBody RequestOtpDto requestOtpDto) {
+    public ResponseEntity<ApiResponse<RequestOtpResponse>> requestOtp(@Valid @RequestBody RequestOtpDto requestOtpDto) {
         boolean success = companyService.initiateOtpLogin(requestOtpDto.getMobileNumber());
 
         RequestOtpResponse response = RequestOtpResponse.builder()
@@ -45,11 +49,10 @@ public class CompanyAuthController {
                 .build();
 
         if (success) {
-            return ResponseEntity.ok(response);
-        } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(response);
+            return ResponseEntity.ok(ApiResponse.success(response));
         }
+
+        throw new MobileNotFoundException();
     }
 
     @PostMapping("/otp/verify")
@@ -71,13 +74,12 @@ public class CompanyAuthController {
 
             String jwtToken = jwtTokenService.generateToken(authentication);
 
-            return ResponseEntity.ok(
-                    Map.of("token", jwtToken,
-                            "message", "Login Successful. Welcome " + company.getName())
-            );
+            return ResponseEntity.ok(ApiResponse.success(jwtToken));
 
         } else {
-            return new ResponseEntity<>("Invalid mobile number or OTP code.", HttpStatus.NOT_FOUND);
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .body(ApiResponse.error(ApiResponse.error("Invalid mobile number or OTP code.")));
         }
     }
 }

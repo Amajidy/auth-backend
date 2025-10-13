@@ -7,10 +7,9 @@ import lombok.Builder;
 import lombok.Data;
 
 @Data
-@Builder
 public class RequestOtpDto {
-    @NotBlank(message = "شماره موبایل الزامی است.")
-    @Size(min = 11, max = 11, message = "شماره موبایل باید ۱۱ رقمی باشد.")
-    @Pattern(regexp = "^[0-9]+$", message = "شماره موبایل فقط باید شامل اعداد باشد.")
+    @NotBlank(message = "شماره موبایل الزامی است")
+    @Size(min = 11, max = 11, message = "شماره موبایل باید ۱۱ رقمی باشد")
+    @Pattern(regexp = "^[0-9]+$", message = "شماره موبایل فقط باید شامل اعداد باشد")
     private String mobileNumber;
 }
